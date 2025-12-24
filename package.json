@@ -1,0 +1,31 @@
+{
+  "name": "wendong_project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo project for frontend architecture practice",
+  "scripts": {
+    "start:web": "pnpm --filter web-react start",
+    "build:web": "pnpm --filter web-react build",
+    "lint": "eslint .",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.1.0",
+  "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
+    "typescript": "^5.3.3"
+  }
+}

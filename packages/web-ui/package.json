@@ -1,0 +1,9 @@
+{
+  "name": "@wendong/web-ui",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "peerDependencies": {
+    "react": ">=18",
+    "antd": ">=5"
+  }
+}
