@@ -1,24 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'antd';
+import { BannerItem, HomeService } from '@wendong/business-core';
+const { getBanners } = HomeService;
 
-const mockData = {
-  title: '今日推荐',
-  items: [
-    { id: 1, title: 'React 18 新特性解析', author: 'Dan' },
-    { id: 2, title: 'Webpack 5 性能优化指南', author: 'Sean' },
-    { id: 3, title: 'Monorepo 最佳实践', author: 'Lerna' },
-  ],
-};
-
+/**
+ * 首页
+ */
 const HomePage: React.FC = () => {
+  const [banners, setBanners] = useState<BannerItem[]>([]);
+
+  // 获取banner列表
+  const getBannerList = async () => {
+    const banners = await getBanners();
+    console.log('banners', banners);
+    setBanners(banners);
+  };
+
+  useEffect(() => {
+    getBannerList();
+  }, []);
+
   return (
     <div style={{ padding: '16px' }}>
-      <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{mockData.title}</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {mockData.items.map((item) => (
-          <Card key={item.id} size="small">
-            <h3 style={{ margin: 0, fontSize: '18px' }}>{item.title}</h3>
-            <p style={{ margin: '8px 0 0', color: '#666' }}>作者: {item.author}</p>
+      <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>首页 Banner</h2>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: '16px',
+        }}
+      >
+        {banners.map((banner) => (
+          <Card
+            key={banner.id}
+            hoverable
+            cover={
+              <img
+                alt={banner.title}
+                src={banner.imageUrl}
+                style={{ height: 160, objectFit: 'cover' }}
+              />
+            }
+            bodyStyle={{ padding: '12px' }}
+          >
+            <Card.Meta title={banner.title} description="点击查看详情" />
           </Card>
         ))}
       </div>
