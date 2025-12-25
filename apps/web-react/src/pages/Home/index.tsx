@@ -1,27 +1,58 @@
-import React from 'react';
-import { Card } from 'antd';
-
-const mockData = {
-  title: '今日推荐',
-  items: [
-    { id: 1, title: 'React 18 新特性解析', author: 'Dan' },
-    { id: 2, title: 'Webpack 5 性能优化指南', author: 'Sean' },
-    { id: 3, title: 'Monorepo 最佳实践', author: 'Lerna' },
-  ],
-};
+import React, { useEffect, useState } from 'react';
+import { HomeService } from '@wendong/business-core';
+import type { HomeData } from '@wendong/business-core/types';
+import SeascapeSection from './components/SeascapeSection';
+import NavSection from './components/NavSection';
+import BannerSection from './components/BannerSection';
+import NewsSection from './components/NewsSection';
+import WaterfallSection from './components/WaterfallSection';
 
 const HomePage: React.FC = () => {
+  const [data, setData] = useState<HomeData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchData = async () => {
+      try {
+        // 使用聚合接口一次性获取所有数据
+        const dashboardData = await HomeService.getHomeDashboard();
+        if (!cancelled) {
+          setData(dashboardData);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Fetch home data failed:', error);
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
-    <div style={{ padding: '16px' }}>
-      <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{mockData.title}</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {mockData.items.map((item) => (
-          <Card key={item.id} size="small">
-            <h3 style={{ margin: 0, fontSize: '18px' }}>{item.title}</h3>
-            <p style={{ margin: '8px 0 0', color: '#666' }}>作者: {item.author}</p>
-          </Card>
-        ))}
-      </div>
+    <div style={{ paddingBottom: 60, background: '#fff', minHeight: '100vh' }}>
+      {/* 1. 海景图  */}
+      <SeascapeSection data={data?.seascapes || []} loading={loading} />
+
+      {/* 2. 导航栏 */}
+      <NavSection data={data?.navs || []} loading={loading} />
+
+      {/* 3. 轮播图 */}
+      <BannerSection data={data?.banners || []} loading={loading} />
+
+      {/* 4. 资讯 */}
+      <NewsSection data={data?.news || []} loading={loading} />
+
+      {/* 5. 瀑布流 (追加组件，本地资源) */}
+      <WaterfallSection />
     </div>
   );
 };
