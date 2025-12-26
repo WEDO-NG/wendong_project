@@ -1,4 +1,4 @@
-import { BannerItem, NavItem, NewsItem, SeascapeItem } from './types';
+import { BannerItem, NavItem, NewsItem, SeascapeItem } from '@wendong/business-core/types';
 
 export const mockBanners: BannerItem[] = [
   {
@@ -33,8 +33,8 @@ export const mockNavs: NavItem[] = [
   {
     id: '3',
     title: '稳健理财',
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2910/2910166.png',
-    linkUrl: '/fund/stable',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2910/2910292.png',
+    linkUrl: '/fund/steady',
   },
   {
     id: '4',
@@ -49,13 +49,7 @@ export const mockSeascapes: SeascapeItem[] = [
     id: '1',
     title: '科技成长混合',
     coverUrl: 'https://picsum.photos/id/48/400/300',
-    description: '聚焦前沿科技，布局未来赛道',
-  },
-  {
-    id: '2',
-    title: '消费升级精选',
-    coverUrl: 'https://picsum.photos/id/60/400/300',
-    description: '捕捉消费复苏机遇',
+    description: '聚焦前沿科技，布局未成熟领域',
   },
 ];
 
@@ -65,13 +59,6 @@ export const mockNews: NewsItem[] = [
     title: '市场周报：A股震荡上行，科技板块领涨',
     summary: '本周A股市场整体呈现震荡上行态势，其中人工智能、半导体等科技板块表现亮眼...',
     publishDate: '2023-12-24',
-    source: '市场研究部',
-  },
-  {
-    id: '2',
-    title: '美联储最新议息会议解读',
-    summary: '美联储宣布维持基准利率不变，符合市场预期，暗示加息周期可能接近尾声...',
-    publishDate: '2023-12-23',
-    source: '宏观策略组',
+    source: '金融时报',
   },
 ];

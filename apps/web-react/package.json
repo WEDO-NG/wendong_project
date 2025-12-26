@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
-    "@wendong/adapters": "workspace:*",
     "@wendong/business-core": "workspace:*",
     "@wendong/web-ui": "workspace:*",
     "@wendong/utils": "workspace:*",

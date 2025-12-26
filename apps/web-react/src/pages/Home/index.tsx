@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { HomeService } from '@wendong/business-core';
 import type { HomeData } from '@wendong/business-core/types';
 import SeascapeSection from './components/SeascapeSection';
 import NavSection from './components/NavSection';
@@ -16,10 +15,21 @@ const HomePage: React.FC = () => {
 
     const fetchData = async () => {
       try {
-        // 使用聚合接口一次性获取所有数据
-        const dashboardData = await HomeService.getHomeDashboard();
+        // 使用真实 API 获取数据
+        const response = await fetch('http://localhost:3001/api/home');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        // 解析统一响应结构
+        const res = await response.json();
+
         if (!cancelled) {
-          setData(dashboardData);
+          // 这里假设 res.code === 0 为成功，取出 res.data
+          if (res.code === 0) {
+            setData(res.data);
+          } else {
+            console.error('API Error:', res.message);
+          }
           setLoading(false);
         }
       } catch (error) {
