@@ -8,6 +8,10 @@ router.get('/', (req, res) => {
   res.send('Welcome to server-node API');
 });
 
-router.get('/home', HomeController.getHomeData);
+// 模块化接口
+router.get('/home/banners', HomeController.getBanners);
+router.get('/home/navs', HomeController.getNavs);
+router.get('/home/seascapes', HomeController.getSeascapes);
+router.get('/home/news', HomeController.getNews);
 
 export default router;

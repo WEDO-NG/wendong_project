@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { HomeData } from '@wendong/business-core/types';
+import { HomeService } from '@wendong/business-core';
+
 import SeascapeSection from './components/SeascapeSection';
 import NavSection from './components/NavSection';
 import BannerSection from './components/BannerSection';
@@ -10,41 +12,19 @@ const HomePage: React.FC = () => {
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    try {
+      const res = await HomeService.getHomeDashboard();
+      setData(res);
+      setLoading(false);
+    } catch (error) {
+      console.error('Fetch home data failed:', error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let cancelled = false;
-
-    const fetchData = async () => {
-      try {
-        // 使用真实 API 获取数据
-        const response = await fetch('http://localhost:3001/api/home');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        // 解析统一响应结构
-        const res = await response.json();
-
-        if (!cancelled) {
-          // 这里假设 res.code === 0 为成功，取出 res.data
-          if (res.code === 0) {
-            setData(res.data);
-          } else {
-            console.error('API Error:', res.message);
-          }
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Fetch home data failed:', error);
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
     fetchData();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   return (

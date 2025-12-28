@@ -4,19 +4,50 @@ import { ResponseUtil } from '../utils/response';
 
 export class HomeController {
   /**
-   * 获取首页数据
+   * 获取 Banners
    */
-  static async getHomeData(req: Request, res: Response) {
+  static async getBanners(req: Request, res: Response) {
     try {
-      // 1. 参数校验 (如果有参数的话)
-      // const { someParam } = req.query;
-      // 2. 调用 Service 层
-      const data = await HomeService.getDashboard();
-      // 3. 统一封装返回结果
+      const data = await HomeService.getBanners();
       res.json(ResponseUtil.success(data));
     } catch (error) {
-      console.error('HomeController error:', error);
-      res.status(500).json(ResponseUtil.error('Failed to fetch home data'));
+      console.error('getBanners error:', error);
+    }
+  }
+
+  /**
+   * 获取 Navs
+   */
+  static async getNavs(req: Request, res: Response) {
+    try {
+      const data = await HomeService.getNavs();
+      res.json(ResponseUtil.success(data));
+    } catch (error) {
+      console.error('getNavs error:', error);
+    }
+  }
+
+  /**
+   * 获取 Seascapes
+   */
+  static async getSeascapes(req: Request, res: Response) {
+    try {
+      const data = await HomeService.getSeascapes();
+      res.json(ResponseUtil.success(data));
+    } catch (error) {
+      console.error('getSeascapes error:', error);
+    }
+  }
+
+  /**
+   * 获取 News
+   */
+  static async getNews(req: Request, res: Response) {
+    try {
+      const data = await HomeService.getNews();
+      res.json(ResponseUtil.success(data));
+    } catch (error) {
+      console.error('getNews error:', error);
     }
   }
 }

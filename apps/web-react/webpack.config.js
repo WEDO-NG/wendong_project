@@ -10,6 +10,12 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      '@wendong/business-core': path.resolve(
+        __dirname,
+        '../../packages/business-core/src/index.ts'
+      ),
+    },
   },
   module: {
     rules: [
@@ -17,6 +23,10 @@ module.exports = {
         test: /\.(ts|tsx)$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+        include: [
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, '../../packages/business-core/src'),
+        ],
       },
       {
         test: /\.css$/,
