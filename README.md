@@ -191,8 +191,7 @@ wendong_project
 │
 ├── packages/
 │   ├── business-core/        # 业务逻辑核心
-│   ├── web-ui/               # Web 端 UI 组件库 (React)
-│   ├── adapters/             # 多端转换层
+│   ├── ui-components/        # 可复用 UI 组件
 │   └── utils/                # 通用工具库
 │
 ├── configs/
@@ -294,7 +293,151 @@ Phase 1 完成时，应满足以下条件：
 
 ---
 
-## 九、后续阶段规划
+## 九、Phase 2：Node 服务端初始化
+
+### 9.1 Phase 2 目标
+
+Phase 2 的目标是：
+
+- 引入一个 **简单、稳定、可长期演进** 的 Node 服务端
+- 用真实 API 替换当前前端中的 mock 数据
+- 为后续接入 MySQL / Redis 打好基础
+- 保持服务端架构不过度设计，但边界清晰
+
+---
+
+### 9.2 Node 技术栈决策（Phase 2 定版）
+
+#### Node 框架
+
+- 选择 **Express 4.x** 作为 HTTP 服务框架
+
+**决策原因：**
+
+- 市场验证时间长，社区成熟
+- 心智模型简单，适合个人项目
+- 不强绑定架构理念，易于后期重构或升级
+
+---
+
+#### 语言与类型系统
+
+- 使用 **TypeScript** 作为服务端语言
+
+**决策原因：**
+
+- 提供明确的类型约束
+- 有助于与 business-core / 前端共享类型定义
+- 降低接口演进带来的维护成本
+
+---
+
+#### 数据库
+
+- 使用 **MySQL** 作为主数据库
+
+**决策原因：**
+
+- 生态成熟、稳定可靠
+- 云服务与本地环境支持良好
+
+---
+
+#### ORM / 数据访问层
+
+- 使用 **Prisma** 作为 ORM
+
+**决策原因：**
+
+- Schema 驱动，模型清晰
+- TypeScript 体验优秀
+- 学习成本低，适合个人项目长期维护
+
+---
+
+#### 缓存层
+
+- 使用 **Redis** 作为缓存组件
+- 客户端库选择 **ioredis**
+
+**决策原因：**
+
+- 行业事实标准
+- API 设计清晰
+- 未来可平滑扩展集群能力
+
+---
+
+### 9.3 server-node 目录结构规划
+
+```bash
+apps/server-node
+├── src/
+│   ├── app.ts              # Express 实例与中间件注册
+│   ├── server.ts           # 服务启动入口
+│   │
+│   ├── routes/             # 路由层（HTTP）
+│   ├── controllers/        # 控制层（请求协调）
+│   ├── services/           # 应用服务层（业务调用）
+│   │
+│   ├── infra/              # 基础设施
+│   │   ├── db.ts           # Prisma 数据库连接
+│   │   └── redis.ts        # Redis 连接封装
+│   │
+│   └── types/              # Node 层类型定义
+│
+├── prisma/
+│   └── schema.prisma
+│
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+---
+
+### 9.4 Phase 2 初始化最小执行步骤（Checklist）
+
+#### Step 1：创建 server-node 包
+
+- 在 `apps/` 下创建 `server-node` 目录
+- 初始化独立的 `package.json`
+- 将其纳入 pnpm workspace 管理
+
+---
+
+#### Step 2：搭建 Express + TypeScript 基础结构
+
+- 初始化 TypeScript 配置
+- 创建最小 Express 应用
+- 提供一个 `/health` 或 `/ping` 接口用于连通性验证
+
+---
+
+#### Step 3：前后端联通
+
+- 前端通过真实 HTTP 请求访问 Node 接口
+- 用真实接口替换至少一处 mock 数据
+
+---
+
+#### Step 4：数据库与缓存基础准备
+
+- 初始化 Prisma（不要求完整业务表）
+- 建立 MySQL 连接配置
+- 封装 Redis 连接（允许暂不使用）
+
+---
+
+#### Step 5：阶段性收尾
+
+- 保证 Node 服务可独立启动
+- 保证前端可以正常调用接口
+- 不引入任何超出当前需求的复杂抽象
+
+---
+
+## 十、后续阶段展望
 
 ### Phase 2
 
@@ -310,7 +453,39 @@ Phase 1 完成时，应满足以下条件：
 
 ---
 
-## 十、写在最后
+## 十一、数据流与类型规范 (Data Flow & Type Definitions)
+
+### 11.1 数据流向
+
+1. UI 层 (apps/web-react)
+   - 只调用 `@wendong/business-core` 暴露的 Service 方法
+   - 不直接发起 fetch/axios；不关心 API URL
+2. 业务核心层 (packages/business-core)
+   - 作为 API 调用层 + 业务逻辑层
+   - 封装统一 HttpUtil（fetch/axios 任一实现）
+   - 定义 Domain Types，并在根导出供前后端共享
+3. 服务层 (apps/server-node)
+   - 提供 RESTful API
+   - 控制器统一响应结构（code/message/data/timestamp）
+   - 引用 business-core 的 Types，保证接口契约一致
+
+### 11.2 类型定义规范
+
+- 类型统一在 business-core 定义与导出，作为单一事实来源
+- 服务端与客户端均从 `@wendong/business-core/types` 引用
+- 避免在客户端/服务端重复定义同名 Interface
+
+### 11.3 HTTP 客户端与响应规范
+
+- 客户端：business-core 提供 `HttpUtil`，统一处理响应结构和错误
+- 响应结构：
+  ```json
+  { "code": 0, "message": "Success", "data": { ... }, "timestamp": "ISO8601" }
+
+
+  ```
+
+## 写在最后
 
 该项目是一个 **长期演进型个人工程项目**。
 

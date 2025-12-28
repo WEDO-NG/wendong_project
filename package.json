@@ -5,9 +5,12 @@
   "description": "Monorepo project for frontend architecture practice",
   "scripts": {
     "start:web": "pnpm --filter web-react start",
+    "start:server": "pnpm --filter server-node dev",
+    "build:server": "pnpm --filter server-node build",
     "build:web": "pnpm --filter web-react build",
-    "lint": "eslint .",
-    "prepare": "husky"
+    "lint": "node scripts/check-node.js && eslint .",
+    "prepare": "husky",
+    "lint:fix": "node scripts/check-node.js && eslint . --fix"
   },
   "engines": {
     "node": ">=18"
