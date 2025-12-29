@@ -91,7 +91,7 @@ export const mockNavs: NavItem[] = [
   {
     id: '5',
     title: '指数投资',
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2910/2910303.png',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2910/2910305.png',
     linkUrl: '/fund/index',
   },
   {

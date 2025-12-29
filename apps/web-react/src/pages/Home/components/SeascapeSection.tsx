@@ -9,7 +9,7 @@ interface SeascapeSectionProps {
 
 const SeascapeSection: React.FC<SeascapeSectionProps> = ({ data, loading }) => {
   return (
-    <div style={{ marginBottom: 24, marginTop: 24 }}>
+    <div style={{ marginBottom: 24, marginTop: 24, padding: 12 }}>
       <div
         style={{
           display: 'flex',
@@ -29,7 +29,6 @@ const SeascapeSection: React.FC<SeascapeSectionProps> = ({ data, loading }) => {
                 style={{
                   minWidth: 200,
                   flexShrink: 0,
-                  borderRadius: 8,
                   overflow: 'hidden',
                   background: '#fff',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.05)',

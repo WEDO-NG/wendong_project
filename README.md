@@ -437,7 +437,88 @@ apps/server-node
 
 ---
 
-## 十、后续阶段展望
+## 十、部署与上线指南 (Deployment Guide)
+
+### 10.1 部署架构概览
+
+```
+用户浏览器
+   ↓ (HTTPS / 443)
+Nginx (反向代理 / 静态资源服务器)
+   ├── / (根路径) → 指向 apps/web-react/dist (静态文件)
+   └── /api (接口) → 转发至 localhost:3001 (Node 服务)
+         ↓
+    PM2 (进程守护)
+         ↓
+    Node.js (Express Server)
+```
+
+### 10.2 服务器选购与环境准备
+
+#### 1. 服务器配置推荐
+- **CPU/内存**：2核 4G (最低 1核 2G，但跑数据库可能吃力)
+- **操作系统**：Ubuntu 22.04 LTS 或 CentOS 7.9
+- **带宽**：按需选择，初期 3-5M 足够
+
+#### 2. 必要软件安装
+- **Node.js** (v18+): 推荐使用 nvm 安装
+- **pnpm**: `npm i -g pnpm`
+- **Nginx**: 用于静态托管与反向代理
+- **PM2**: `npm i -g pm2` (用于守护 Node 进程)
+- **MySQL**: 数据库服务
+- **Redis**: 缓存服务
+
+### 10.3 生产环境构建步骤
+
+#### 前端构建
+1. 在本地或 CI/CD 环境执行：
+   ```bash
+   pnpm --filter web-react build
+   ```
+2. 将生成的 `apps/web-react/dist` 目录上传至服务器 (例如 `/var/www/wendong-project/html`)。
+
+#### 后端部署
+1. 推荐在服务器拉取 Git 代码。
+2. 安装依赖：
+   ```bash
+   pnpm install --prod
+   ```
+3. 生成 Prisma Client：
+   ```bash
+   pnpm --filter server-node prisma generate
+   ```
+4. 启动服务：
+   ```bash
+   cd apps/server-node
+   pm2 start dist/server.js --name server-node
+   ```
+
+### 10.4 Nginx 配置示例
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # 前端静态资源
+    location / {
+        root /var/www/wendong-project/html;
+        index index.html;
+        try_files $uri $uri/ /index.html; # React Router 必须配置
+    }
+
+    # 后端接口反向代理
+    location /api {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+---
+
+## 十一、后续阶段展望
 
 ### Phase 2
 
