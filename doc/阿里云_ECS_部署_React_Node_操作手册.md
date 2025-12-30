@@ -157,7 +157,7 @@ pnpm --filter web-react build
 
 1. **生成 Prisma Client** (必须执行，否则报错)：
    ```bash
-   pnpm --filter server-node prisma generate
+   pnpm --filter server-node exec prisma generate
    ```
 
 2. **编译 TS 代码**：
@@ -173,8 +173,11 @@ pnpm --filter web-react build
 
 ```bash
 cd apps/server-node
-pm2 start dist/server.js --name wendong-node
+// 启动服务
+pm2 start dist/server.js --name wendong-node 
+// 保存当前运行列表。
 pm2 save
+// 生成开机自启脚本。
 pm2 startup
 ```
 
