@@ -1,27 +1,76 @@
-import React from 'react';
-import { Card } from 'antd';
+import React, { useEffect, useState, Suspense } from 'react';
+import { Skeleton } from 'antd';
+import type { HomeData } from '@wendong/business-core/types';
+import { HomeService } from '@wendong/business-core';
 
-const mockData = {
-  title: '今日推荐',
-  items: [
-    { id: 1, title: 'React 18 新特性解析', author: 'Dan' },
-    { id: 2, title: 'Webpack 5 性能优化指南', author: 'Sean' },
-    { id: 3, title: 'Monorepo 最佳实践', author: 'Lerna' },
-  ],
-};
+import SeascapeSection from './components/SeascapeSection';
+import NavSection from './components/NavSection';
+import BannerSection from './components/BannerSection';
+import NewsSection from './components/NewsSection';
+
+// 性能优化：组件级懒加载 (Code Splitting)
+// 将非首屏的瀑布流组件拆分为独立的 Chunk，减少首屏 JS 体积
+const WaterfallSection = React.lazy(() => import('./components/WaterfallSection'));
 
 const HomePage: React.FC = () => {
+  const [data, setData] = useState<HomeData | null>(null);
+  const [loading, setLoading] = useState(true);
+  // 性能优化：延迟渲染非关键组件，减少首屏主线程阻塞
+  const [showLowPriority, setShowLowPriority] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const res = await HomeService.getHomeDashboard();
+      setData(res);
+      setLoading(false);
+      // 核心优化：让 Banner (LCP) 先渲染，100ms 后再渲染导航、新闻等
+      // 这能有效打断 Long Task，降低 Total Blocking Time
+      setTimeout(() => setShowLowPriority(true), 100);
+    } catch (error) {
+      console.error('Fetch home data failed:', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
-    <div style={{ padding: '16px' }}>
-      <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{mockData.title}</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {mockData.items.map((item) => (
-          <Card key={item.id} size="small">
-            <h3 style={{ margin: 0, fontSize: '18px' }}>{item.title}</h3>
-            <p style={{ margin: '8px 0 0', color: '#666' }}>作者: {item.author}</p>
-          </Card>
-        ))}
-      </div>
+    <div style={{ paddingBottom: 60, background: '#fff', minHeight: '100vh' }}>
+      {/* 1. 海景图 */}
+      {loading ? (
+        <div style={{ padding: 16 }}>
+          {/* 使用骨架屏模拟真实组件高度，防止高度塌陷 */}
+          <Skeleton.Image active style={{ width: '100%', height: 240 }} />
+        </div>
+      ) : (
+        <SeascapeSection data={data?.seascapes || []} loading={loading} />
+      )}
+
+      {/* 2. 导航栏 */}
+      {/* 性能优化：降低非 LCP 区域优先级，减少首屏 DOM 节点 */}
+      {!loading && showLowPriority && <NavSection data={data?.navs || []} loading={loading} />}
+
+      {/* 3. 轮播图 (LCP 候选区域) */}
+      {loading ? (
+        <div style={{ padding: '0 16px' }}>
+          <Skeleton.Button active block style={{ height: 160, borderRadius: 8 }} />
+        </div>
+      ) : (
+        <BannerSection data={data?.banners || []} loading={loading} />
+      )}
+
+      {/* 4. 资讯 */}
+      {!loading && showLowPriority && <NewsSection data={data?.news || []} loading={loading} />}
+
+      {/* 5. 瀑布流 (追加组件，本地资源) */}
+      {/* 性能优化：仅当首屏数据加载完成且低优先级任务允许时才渲染 */}
+      {!loading && showLowPriority && (
+        <Suspense fallback={null}>
+          <WaterfallSection />
+        </Suspense>
+      )}
     </div>
   );
 };

@@ -14,7 +14,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@wendong/business-core": ["../../packages/business-core/src/index.ts"],
+      "@wendong/business-core/*": ["../../packages/business-core/src/*"]
+    }
   },
   "include": ["src"]
 }

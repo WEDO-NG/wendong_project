@@ -1,8 +1,0 @@
-{
-  "name": "@wendong/adapters",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "dependencies": {
-    "@wendong/business-core": "workspace:*"
-  }
-}
