@@ -1,4 +1,6 @@
-export interface ApiResponse<T = any> {
+import dayjs from 'dayjs';
+
+interface ResponseData<T> {
   code: number;
   message: string;
   data: T;
@@ -6,21 +8,21 @@ export interface ApiResponse<T = any> {
 }
 
 export class ResponseUtil {
-  static success<T>(data: T, message: string = 'Success'): ApiResponse<T> {
+  static success<T>(data: T, message = 'Success'): ResponseData<T> {
     return {
       code: 0,
       message,
       data,
-      timestamp: new Date().toISOString(),
+      timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     };
   }
 
-  static error(message: string = 'Internal Server Error', code: number = 500): ApiResponse<null> {
+  static error(message = 'Internal Server Error', code = 500): ResponseData<null> {
     return {
       code,
       message,
       data: null,
-      timestamp: new Date().toISOString(),
+      timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     };
   }
 }

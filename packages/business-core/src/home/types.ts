@@ -17,6 +17,7 @@ export interface SeascapeItem {
   title: string;
   coverUrl: string;
   description?: string;
+  price?: number; // 新增价格字段
 }
 
 export interface NewsItem {

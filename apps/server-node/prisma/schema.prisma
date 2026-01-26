@@ -10,10 +10,93 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 占位模型，用于解决 Prisma Client 生成报错问题
-// 实际开发时请替换为真实的业务模型
-model Example {
+// 示例：定义 User 模型
+model User {
   id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  posts     Post[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+}
+
+// --- 首页模块数据模型 ---
+
+// 1. 轮播图
+model Banner {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(100)
+  imageUrl  String   @db.VarChar(255)
+  linkUrl   String?  @db.VarChar(255)
+  order     Int      @default(0) // 排序字段，值越大越靠前
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 2. 导航菜单
+model Navigation {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(50)
+  icon      String   @db.VarChar(50) // 存储图标名称
+  linkUrl   String   @db.VarChar(255)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// 3. 海景房推荐
+model Seascape {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(100)
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String   @db.VarChar(255)
+  location    String?  @db.VarChar(100)
+  tags        String?  @db.VarChar(255) // 用逗号分隔存储 "海景,大阳台"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 4. 新闻资讯
+model News {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(200)
+  summary     String   @db.Text
+  imageUrl    String?  @db.VarChar(255)
+  source      String?  @db.VarChar(50)
+  publishDate DateTime @default(now())
+  readCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// --- Phase 3: AI 模块模型 ---
+
+// 5. 对话会话
+model ChatSession {
+  id        Int           @id @default(autoincrement())
+  uuid      String        @unique @default(uuid())
+  title     String?       // 对话标题 (通常取第一条消息的前20个字)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+}
+
+// 6. 对话消息
+model ChatMessage {
+  id         Int         @id @default(autoincrement())
+  role       String      // "user" | "assistant" | "system"
+  content    String      @db.Text
+  tokenCount Int?        // 记录 Token 消耗
+  sessionId  Int
+  session    ChatSession @relation(fields: [sessionId], references: [id])
+  createdAt  DateTime    @default(now())
 }

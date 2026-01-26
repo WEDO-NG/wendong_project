@@ -423,9 +423,12 @@ apps/server-node
 
 #### Step 4：数据库与缓存基础准备
 
+> 详细指南请参考：[Server Node 开发指南 - 数据库实践](./doc/server-node-guide.md#六数据库实践指南-database-practice)
+
 - 初始化 Prisma（不要求完整业务表）
-- 建立 MySQL 连接配置
+- 建立 MySQL 连接配置 (推荐 Docker)
 - 封装 Redis 连接（允许暂不使用）
+- 跑通 `prisma migrate` 与 Client 生成
 
 ---
 
@@ -437,7 +440,26 @@ apps/server-node
 
 ---
 
-## 十、部署与上线指南 (Deployment Guide)
+## 十、Phase 3：AI 能力接入 (In Progress)
+
+> **当前状态**：进行中
+> **详细规划**：[Phase 3 AI 集成指南](./doc/phase3-ai-integration.md)
+
+### 10.1 核心目标
+在 Phase 2 建立的稳固后端基础上，引入 DeepSeek/OpenAI 能力，实现：
+1.  **智能问答**：基于数据库内容的 RAG（检索增强生成）。
+2.  **流式体验**：实现类似 ChatGPT 的打字机效果。
+3.  **长期记忆**：利用 MySQL 存储对话历史。
+
+### 10.2 待办任务 (Todo)
+- [ ] **基础设施**：配置 DeepSeek API Key 与 SDK。
+- [ ] **数据库**：新增 `ChatSession` 与 `ChatMessage` 表。
+- [ ] **服务端**：实现 SSE 流式接口与上下文管理。
+- [ ] **客户端**：开发 ChatUI 组件与打字机效果。
+
+---
+
+## 十一、部署与上线指南 (Deployment Guide)
 
 ### 10.1 部署架构概览
 

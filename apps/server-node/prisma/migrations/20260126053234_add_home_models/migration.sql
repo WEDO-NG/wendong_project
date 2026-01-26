@@ -1,0 +1,54 @@
+-- CreateTable
+CREATE TABLE `Banner` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(100) NOT NULL,
+    `imageUrl` VARCHAR(255) NOT NULL,
+    `linkUrl` VARCHAR(255) NULL,
+    `order` INTEGER NOT NULL DEFAULT 0,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Navigation` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(50) NOT NULL,
+    `icon` VARCHAR(50) NOT NULL,
+    `linkUrl` VARCHAR(255) NOT NULL,
+    `order` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Seascape` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(100) NOT NULL,
+    `description` TEXT NOT NULL,
+    `price` DECIMAL(10, 2) NOT NULL,
+    `imageUrl` VARCHAR(255) NOT NULL,
+    `location` VARCHAR(100) NULL,
+    `tags` VARCHAR(255) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `News` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(200) NOT NULL,
+    `summary` TEXT NOT NULL,
+    `imageUrl` VARCHAR(255) NULL,
+    `source` VARCHAR(50) NULL,
+    `publishDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `readCount` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
