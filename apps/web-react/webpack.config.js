@@ -34,6 +34,7 @@ module.exports = (env, argv) => {
           include: [
             path.resolve(__dirname, 'src'),
             path.resolve(__dirname, '../../packages/business-core/src'),
+            path.resolve(__dirname, '../../packages/adapters/src'),
           ],
         },
         {
