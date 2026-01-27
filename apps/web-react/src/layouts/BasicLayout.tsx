@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { HomeOutlined, UnorderedListOutlined, UserOutlined } from '@ant-design/icons';
+import { HomeOutlined, CommentOutlined, UserOutlined } from '@ant-design/icons';
 
 const TabBar: React.FC = () => {
   const navigate = useNavigate();
@@ -8,7 +8,7 @@ const TabBar: React.FC = () => {
 
   const tabs = [
     { key: '/', icon: <HomeOutlined />, label: '首页' },
-    { key: '/list', icon: <UnorderedListOutlined />, label: '列表' },
+    { key: '/chat', icon: <CommentOutlined />, label: 'AI' },
     { key: '/profile', icon: <UserOutlined />, label: '我的' },
   ];
 

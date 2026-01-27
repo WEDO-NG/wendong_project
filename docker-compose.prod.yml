@@ -1,0 +1,61 @@
+services:
+  # 1. 数据库
+  mysql:
+    image: mysql:8.0
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-password}
+      MYSQL_DATABASE: wendong_project
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    networks:
+      - wendong_net
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # 2. 缓存
+  redis:
+    image: redis:alpine
+    networks:
+      - wendong_net
+
+  # 3. 后端 API 服务
+  server-node:
+    build:
+      context: .
+      dockerfile: apps/server-node/Dockerfile
+    environment:
+      - PORT=3001
+      - DATABASE_URL=mysql://root:${MYSQL_PASSWORD:-password}@mysql:3306/wendong_project
+      - REDIS_URL=redis://redis:6379
+      # 生产环境密钥应通过 CI/CD 注入，这里仅为示例
+      - AI_API_KEY=${AI_API_KEY}
+    networks:
+      - wendong_net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: always
+
+  # 4. 前端静态服务 (Nginx)
+  web-react:
+    build:
+      context: .
+      dockerfile: apps/web-react/Dockerfile
+    ports:
+      - "80:80" # 对外暴露 80 端口
+    networks:
+      - wendong_net
+    depends_on:
+      - server-node
+    restart: always
+
+networks:
+  wendong_net:
+
+volumes:
+  mysql_prod_data:

@@ -96,6 +96,7 @@ model ChatMessage {
   role       String      // "user" | "assistant" | "system"
   content    String      @db.Text
   tokenCount Int?        // 记录 Token 消耗
+  isDeleted  Boolean     @default(false)
   sessionId  Int
   session    ChatSession @relation(fields: [sessionId], references: [id])
   createdAt  DateTime    @default(now())

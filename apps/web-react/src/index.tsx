@@ -3,11 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import BasicLayout from './layouts/BasicLayout';
+import HomePage from './pages/Home';
 import './styles/global.css';
 
 // 路由懒加载优化
-const HomePage = React.lazy(() => import('./pages/Home'));
-const ListPage = React.lazy(() => import('./pages/List'));
+const ChatPage = React.lazy(() => import('./pages/Chat'));
 const ProfilePage = React.lazy(() => import('./pages/Profile'));
 
 const PageLoading = () => (
@@ -23,7 +23,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<BasicLayout />}>
             <Route index element={<HomePage />} />
-            <Route path="list" element={<ListPage />} />
+            <Route path="chat" element={<ChatPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

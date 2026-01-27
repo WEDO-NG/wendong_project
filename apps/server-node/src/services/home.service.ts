@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BannerItem, NavItem, NewsItem, SeascapeItem } from '@wendong/business-core/types';
+import { BannerItem, NavItem, NewsItem, SeascapeItem } from '@wendong/business-core';
 import prisma from '../infra/db';
 
 export class HomeService {

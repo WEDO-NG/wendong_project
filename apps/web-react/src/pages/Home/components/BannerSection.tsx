@@ -1,5 +1,5 @@
 import React from 'react';
-import { BannerItem } from '@wendong/business-core/types';
+import { BannerItem } from '@wendong/business-core';
 import { Carousel } from 'antd';
 
 interface BannerSectionProps {

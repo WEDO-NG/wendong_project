@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import prisma from '../infra/db';
-import { HomeService } from './home.service';
+import { PromptManager } from '../utils/prompt-manager';
 
 // 初始化 OpenAI Client (复用 DeepSeek 配置)
 const client = new OpenAI({
@@ -33,38 +33,6 @@ export class AIService {
   }
 
   /**
-   * 构建上下文 (Simple RAG)
-   * 根据用户输入关键词，动态注入相关业务数据
-   */
-  private static async buildSystemContext(userMessage: string): Promise<string> {
-    let contextData = '';
-    const lowerMsg = userMessage.toLowerCase();
-
-    // 策略 1: 如果问到 "新闻" 或 "资讯"，注入最新新闻
-    if (lowerMsg.includes('新闻') || lowerMsg.includes('news') || lowerMsg.includes('资讯')) {
-      const news = await HomeService.getNews();
-      contextData += `\n[Context: Latest News]\n${news
-        .map((n) => `- ${n.title} (${n.publishDate}): ${n.summary}`)
-        .join('\n')}\n`;
-    }
-
-    // 策略 2: 如果问到 "海景" 或 "房"，注入推荐房源
-    if (lowerMsg.includes('海景') || lowerMsg.includes('房') || lowerMsg.includes('seascape')) {
-      const seascapes = await HomeService.getSeascapes();
-      contextData += `\n[Context: Seascape Recommendations]\n${seascapes
-        .map((s) => `- ${s.title}: ¥${s.price} (${s.description})`)
-        .join('\n')}\n`;
-    }
-
-    const basePrompt = `You are a helpful assistant for the "Wendong Project". 
-    You can answer questions about the project, news, and seascape recommendations.
-    Use the provided context to answer accurately. If the answer is not in the context, use your general knowledge but mention that it's general info.
-    Always reply in Chinese unless asked otherwise.`;
-
-    return contextData ? `${basePrompt}\n\nRelevant Context Data:\n${contextData}` : basePrompt;
-  }
-
-  /**
    * 发送消息并获取流式响应
    * @param message 用户输入
    * @param sessionUuid 会话ID
@@ -87,8 +55,9 @@ export class AIService {
       },
     });
 
-    // 3. 构建 Prompt (RAG)
-    const systemPrompt = await this.buildSystemContext(message);
+    // 3. 构建 Prompt (RAG) - 使用 PromptManager
+    const systemPrompt = await PromptManager.buildSystemPrompt(message);
+
     const historyMessages = session.messages.map((m: any) => ({
       role: m.role as 'user' | 'assistant' | 'system',
       content: m.content,
@@ -97,7 +66,22 @@ export class AIService {
     // 限制历史记录长度，防止 Token 溢出 (取最近 10 条)
     const recentHistory = historyMessages.slice(-10);
 
-    // 4. 调用 LLM
+    // 4. 检查每日限制 (100 次)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const count = await (prisma as any).chatMessage.count({
+      where: {
+        sessionId: session.id,
+        role: 'user',
+        createdAt: { gte: today },
+      },
+    });
+
+    if (count >= 100) {
+      throw new Error('请求次数已达上限 ');
+    }
+
+    // 5. 调用 LLM
     const stream = await client.chat.completions.create({
       model: MODEL_NAME,
       messages: [
@@ -108,7 +92,7 @@ export class AIService {
       stream: true,
     });
 
-    // 5. 处理流式响应
+    // 6. 处理流式响应
     let fullResponse = '';
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || '';
@@ -118,7 +102,7 @@ export class AIService {
       }
     }
 
-    // 6. 保存 AI 响应
+    // 7. 保存 AI 响应
     await (prisma as any).chatMessage.create({
       data: {
         role: 'assistant',
@@ -127,7 +111,7 @@ export class AIService {
       },
     });
 
-    // 7. 更新会话标题 (如果是第一条消息)
+    // 8. 更新会话标题 (如果是第一条消息)
     if (session.messages.length === 0) {
       await (prisma as any).chatSession.update({
         where: { id: session.id },
@@ -136,5 +120,68 @@ export class AIService {
     }
 
     return { sessionUuid: session.uuid };
+  }
+
+  /**
+   * 获取会话历史记录
+   */
+  static async getHistory(uuid: string) {
+    const session = await (prisma as any).chatSession.findUnique({
+      where: { uuid },
+      include: {
+        messages: {
+          where: { isDeleted: false },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!session) return [];
+
+    return session.messages.map((m: any) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      createdAt: m.createdAt,
+    }));
+  }
+
+  /**
+   * 删除消息 (软删除)
+   * 如果是用户消息，需要连带删除 AI 的回复（假设 AI 回复紧跟在用户消息之后）
+   */
+  static async deleteMessage(id: number) {
+    // 1. 查找当前消息
+    const message = await (prisma as any).chatMessage.findUnique({
+      where: { id },
+    });
+
+    if (!message) return;
+
+    // 2. 软删除当前消息
+    await (prisma as any).chatMessage.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
+
+    // 3. 如果是用户消息，尝试删除紧随其后的 AI 回复
+    if (message.role === 'user') {
+      const nextMessage = await (prisma as any).chatMessage.findFirst({
+        where: {
+          sessionId: message.sessionId,
+          id: { gt: message.id }, // ID 大于当前消息
+          isDeleted: false,
+        },
+        orderBy: { id: 'asc' }, // 取第一条
+      });
+
+      // 只有当下一条消息是 AI 回复时才删除
+      if (nextMessage && nextMessage.role === 'assistant') {
+        await (prisma as any).chatMessage.update({
+          where: { id: nextMessage.id },
+          data: { isDeleted: true },
+        });
+      }
+    }
   }
 }

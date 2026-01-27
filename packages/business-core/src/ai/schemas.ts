@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from 'zod';
 
 /**
@@ -5,7 +6,9 @@ import { z } from 'zod';
  * 这是一个业务规则 (Business Rule)，所以放在 business-core 中
  */
 export const AIChatSchema = z.object({
-  message: z.string({ required_error: 'Message is required' } as any).min(1, 'Message cannot be empty'),
+  message: z
+    .string({ required_error: 'Message is required' } as any)
+    .min(1, 'Message cannot be empty'),
   sessionUuid: z.string().optional(),
 });
 

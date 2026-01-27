@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
 import { ResponseUtil } from './response';
 
 /**
@@ -25,7 +26,12 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
   let statusCode = 500;
 
   // 根据错误类型定制响应 (可扩展)
-  if (err.code === 'P2002') {
+  if (err instanceof ZodError) {
+    // Zod 校验错误
+    const messages = err.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('; ');
+    message = `Validation Error: ${messages}`;
+    statusCode = 400;
+  } else if (err.code === 'P2002') {
     // Prisma 唯一性约束冲突
     message = '数据已存在，请勿重复创建';
     statusCode = 409;

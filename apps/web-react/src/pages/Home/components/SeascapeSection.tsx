@@ -1,5 +1,5 @@
 import React from 'react';
-import { SeascapeItem } from '@wendong/business-core/types';
+import { SeascapeItem } from '@wendong/business-core';
 import { Card } from 'antd';
 
 interface SeascapeSectionProps {

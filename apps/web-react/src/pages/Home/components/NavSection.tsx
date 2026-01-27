@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavItem } from '@wendong/business-core/types';
+import { NavItem } from '@wendong/business-core';
 import { Avatar } from 'antd';
 
 interface NavSectionProps {

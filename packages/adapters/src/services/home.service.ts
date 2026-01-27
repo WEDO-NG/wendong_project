@@ -1,5 +1,5 @@
-import { HttpUtil } from '../utils/http';
-import type { BannerItem, HomeData, NavItem, NewsItem, SeascapeItem } from './types';
+import { HttpUtil } from '../infrastructure/http';
+import type { BannerItem, HomeData, NavItem, NewsItem, SeascapeItem } from '@wendong/business-core';
 
 export class HomeService {
   /**

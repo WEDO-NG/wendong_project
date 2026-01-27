@@ -73,6 +73,8 @@ pnpm install
 
 复制 `.env.example` (如有) 或手动创建 `apps/server-node/.env`：
 
+> **安全警告**：`.env` 文件包含敏感信息（密码、API Key），已在 `.gitignore` 中配置忽略。**切勿**将此文件提交到 Git 仓库！在生产环境中，请参考部署指南进行安全配置。
+
 ```env
 PORT=3001
 DATABASE_URL="mysql://root:password@localhost:3306/wendong_project"

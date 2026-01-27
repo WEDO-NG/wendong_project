@@ -1,5 +1,5 @@
 import React from 'react';
-import { NewsItem } from '@wendong/business-core/types';
+import { NewsItem } from '@wendong/business-core';
 import { List, Tag } from 'antd';
 
 interface NewsSectionProps {

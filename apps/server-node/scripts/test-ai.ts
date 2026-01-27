@@ -38,7 +38,7 @@ async function main() {
 
     console.log('\n--- Response Stream ---');
     let fullContent = '';
-    
+
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || '';
       process.stdout.write(content);
@@ -50,7 +50,6 @@ async function main() {
     console.log(`✅ Test Passed!`);
     console.log(`⏱️ Duration: ${duration}ms`);
     console.log(`📝 Full Response: ${fullContent}`);
-
   } catch (error) {
     console.error('\n❌ Test Failed:');
     if (error instanceof OpenAI.APIError) {

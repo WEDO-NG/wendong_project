@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { Skeleton } from 'antd';
-import type { HomeData } from '@wendong/business-core/types';
-import { HomeService } from '@wendong/business-core';
+import type { HomeData } from '@wendong/business-core';
+import { HomeService } from '@wendong/adapters';
 
 import SeascapeSection from './components/SeascapeSection';
 import NavSection from './components/NavSection';

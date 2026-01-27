@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { HomeController } from '../controllers/home.controller';
-import { asyncHandler } from '../utils/error';
 import aiRoutes from './ai.routes';
+import homeRoutes from './home.routes';
 
 const router = Router();
 
@@ -13,10 +12,7 @@ router.get('/', (req, res) => {
 // AI 模块路由
 router.use('/ai', aiRoutes);
 
-// 模块化接口 (使用 asyncHandler 包裹)
-router.get('/home/banners', asyncHandler(HomeController.getBanners));
-router.get('/home/navs', asyncHandler(HomeController.getNavs));
-router.get('/home/seascapes', asyncHandler(HomeController.getSeascapes));
-router.get('/home/news', asyncHandler(HomeController.getNews));
+// Home 模块路由
+router.use('/home', homeRoutes);
 
 export default router;
