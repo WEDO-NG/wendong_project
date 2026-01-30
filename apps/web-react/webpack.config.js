@@ -29,7 +29,14 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.(ts|tsx)$/,
-          use: 'ts-loader',
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                transpileOnly: true, // 关闭类型检查，加快构建速度并减少内存占用
+              },
+            },
+          ],
           exclude: /node_modules/,
           include: [
             path.resolve(__dirname, 'src'),
