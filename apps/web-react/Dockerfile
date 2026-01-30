@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . .
 
 # 安装依赖
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # 构建依赖包 (确保构建顺序)
 RUN pnpm --filter @wendong/business-core build

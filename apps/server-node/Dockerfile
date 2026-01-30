@@ -7,7 +7,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 COPY . .
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 RUN pnpm --filter @wendong/business-core build
 RUN pnpm --filter @wendong/adapters build
 RUN pnpm --filter server-node prisma generate

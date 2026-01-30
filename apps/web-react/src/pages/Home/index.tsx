@@ -23,6 +23,7 @@ const HomePage: React.FC = () => {
       const res = await HomeService.getHomeDashboard();
       setData(res);
       setLoading(false);
+      console.log('HomePage data:', data);
       // 核心优化：让 Banner (LCP) 先渲染，100ms 后再渲染导航、新闻等
       // 这能有效打断 Long Task，降低 Total Blocking Time
       setTimeout(() => setShowLowPriority(true), 100);
