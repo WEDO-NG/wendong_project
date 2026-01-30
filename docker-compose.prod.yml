@@ -32,6 +32,7 @@ services:
       - REDIS_URL=redis://redis:6379
       # 生产环境密钥应通过 CI/CD 注入，这里仅为示例
       - AI_API_KEY=${AI_API_KEY}
+      - AI_BASE_URL=${AI_BASE_URL}
     networks:
       - wendong_net
     depends_on:

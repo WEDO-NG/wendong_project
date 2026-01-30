@@ -116,6 +116,22 @@ PORT=3001
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
+### 3.2 初始化数据库结构 (Prisma Migrate)
+
+首次部署时，MySQL 数据库是空的，需要执行一次迁移，创建业务表（如 `Navigation`、`Banner` 等）。
+
+如果你的 `server-node` 镜像里已包含 Prisma CLI（推荐），可以直接在容器内执行：
+
+```bash
+docker compose -f docker-compose.prod.yml exec -T server-node node_modules/.bin/prisma migrate deploy
+```
+
+如果容器内没有 Prisma CLI，也可以临时用 SQL 方式执行（以仓库内 migration.sql 为准）：
+
+```bash
+docker compose -f docker-compose.prod.yml exec -T mysql mysql -uroot -p\"${MYSQL_PASSWORD:-password}\" wendong_project < apps/server-node/prisma/migrations/*/migration.sql
+```
+
 ### 3.2 验证服务状态
 
 ```bash
@@ -173,5 +189,15 @@ docker exec wendong_project-mysql-1 mysqldump -u root -p"$MYSQL_PASSWORD" wendon
 - 502 Bad Gateway: 说明 Nginx 启动了，但 `server-node` 没启动或挂了。检查后端日志。
 - 404 Not Found: 检查 Nginx 配置是否正确代理了 `/api`。
 
-**Q3: 镜像拉取超时**
-- 确认 **1.4 节** 的镜像加速器已配置并重启了 Docker。
+**Q3: 镜像拉取超时 (Image Pull Backoff)**
+- **现象**：`docker-compose build` 时卡在 `FROM node:18-alpine` 或报错 `i/o timeout`。
+- **原因**：国内网络无法访问 Docker Hub，且加速器失效。
+- **解决方案**：
+  1.  **多试几次**：有时候是间歇性的。
+  2.  **更换加速器**：尝试搜索最新的可用加速器地址。
+  3.  **终极方案 (离线传输)**：
+      - 本地构建 (注意平台)：`docker buildx build --platform linux/amd64 -t wendong-server:latest -f apps/server-node/Dockerfile .`
+      - 导出：`docker save -o server.tar wendong-server:latest`
+      - 上传：`scp server.tar root@<IP>:/root`
+      - 服务器导入：`docker load -i server.tar`
+      - 修改 `docker-compose.prod.yml` 中的 `build:` 为 `image: wendong-server:latest`。

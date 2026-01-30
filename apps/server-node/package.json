@@ -8,10 +8,12 @@
     "start": "node dist/server.js",
     "prisma": "prisma",
     "db:migrate": "echo 'Run Prisma Migrate Dev' && prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:studio": "echo 'Open Prisma Studio' && prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",
+    "prisma": "^5.7.0",
     "@wendong/business-core": "workspace:*",
     "cors": "^2.8.5",
     "dayjs": "^1.11.19",
@@ -27,7 +29,6 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.4",
     "nodemon": "^3.0.2",
-    "prisma": "^5.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
