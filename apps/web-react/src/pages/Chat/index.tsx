@@ -147,7 +147,7 @@ const ChatPage: React.FC = () => {
           loading={isStreaming}
           onSubmit={handleSend}
           onCancel={abort}
-          placeholder="聊聊项目问题"
+          placeholder="聊聊项目问题吧"
         />
       </div>
     </Flex>

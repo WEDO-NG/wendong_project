@@ -23,9 +23,11 @@ services:
 
   # 3. 后端 API 服务
   server-node:
-    build:
-      context: .
-      dockerfile: apps/server-node/Dockerfile
+    # 替换为你的阿里云镜像地址
+    image: crpi-emqag2foql120pnh.cn-beijing.personal.cr.aliyuncs.com/wendong-registry/server-node:latest
+    # build:
+    #   context: .
+    #   dockerfile: apps/server-node/Dockerfile
     environment:
       - PORT=3001
       - DATABASE_URL=mysql://root:${MYSQL_PASSWORD:-password}@mysql:3306/wendong_project
@@ -44,9 +46,11 @@ services:
 
   # 4. 前端静态服务 (Nginx)
   web-react:
-    build:
-      context: .
-      dockerfile: apps/web-react/Dockerfile
+    # 替换为你的阿里云镜像地址
+    image: crpi-emqag2foql120pnh.cn-beijing.personal.cr.aliyuncs.com/wendong-registry/web-react:latest
+    # build:
+    #   context: .
+    #   dockerfile: apps/web-react/Dockerfile
     ports:
       - "80:80" # 对外暴露 80 端口
     networks:
