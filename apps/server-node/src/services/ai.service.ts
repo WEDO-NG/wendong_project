@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import OpenAI from 'openai';
 import prisma from '../infra/db';
 import { PromptManager } from '../utils/prompt-manager';
@@ -34,6 +35,8 @@ export class AIService {
 
   /**
    * 发送消息并获取流式响应
+   * 当前默认版本：Vector Search RAG
+   * - System Prompt 使用“向量检索 TopK 文档片段”构建，减少 Token、提升相关性
    * @param message 用户输入
    * @param sessionUuid 会话ID
    * @param onStream 流式回调
@@ -55,7 +58,6 @@ export class AIService {
       },
     });
 
-    // 3. 构建 Prompt (RAG) - 使用 PromptManager
     const systemPrompt = await PromptManager.buildSystemPrompt(message);
 
     const historyMessages = session.messages.map((m: any) => ({

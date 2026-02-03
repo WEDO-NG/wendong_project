@@ -18,16 +18,16 @@
 
 ## 🛠 技术栈 (Tech Stack)
 
-| 领域 | 技术选型 | 说明 |
-| --- | --- | --- |
-| **包管理** | pnpm | Workspace 方案 |
-| **前端** | React 18 | Hooks, Functional Components |
-| **UI 库** | Ant Design | Ant Design X (AI Components) |
-| **构建** | Webpack 5 | 深度性能优化 |
-| **后端** | Express | TypeScript |
-| **数据库** | MySQL | Prisma ORM |
-| **缓存** | Redis | ioredis |
-| **AI** | OpenAI SDK | 接入 DeepSeek 模型 |
+| 领域       | 技术选型   | 说明                         |
+| ---------- | ---------- | ---------------------------- |
+| **包管理** | pnpm       | Workspace 方案               |
+| **前端**   | React 18   | Hooks, Functional Components |
+| **UI 库**  | Ant Design | Ant Design X (AI Components) |
+| **构建**   | Webpack 5  | 深度性能优化                 |
+| **后端**   | Express    | TypeScript                   |
+| **数据库** | MySQL      | Prisma ORM                   |
+| **缓存**   | Redis      | ioredis                      |
+| **AI**     | OpenAI SDK | 接入 DeepSeek 模型           |
 
 ---
 
@@ -54,6 +54,7 @@ wendong_project
 ## 🚀 快速开始 (Quick Start)
 
 ### 前置要求
+
 - Node.js >= 18
 - pnpm
 - Docker (可选，用于启动 DB)
@@ -61,25 +62,29 @@ wendong_project
 ### 安装与启动
 
 1.  **安装依赖**
+
     ```bash
     pnpm install
     ```
 
 2.  **启动数据库 (Docker)**
+
     ```bash
     docker-compose up -d
     ```
 
 3.  **生成 Prisma Client**
+
     ```bash
     pnpm --filter server-node prisma generate
     ```
 
 4.  **启动开发环境**
+
     ```bash
     # 同时启动前后端
     pnpm dev
-    
+
     # 或单独启动
     pnpm --filter web-react start
     pnpm --filter server-node dev
@@ -90,12 +95,14 @@ wendong_project
 ## 📚 文档索引 (Documentation)
 
 ### 核心文档
+
 - **[架构设计](./doc/architecture.md)**: 分层设计、Business Core 说明、Clean Architecture 原则。
 - **[演进路线](./doc/roadmap.md)**: 项目各阶段规划与进度 (Phase 1-3)。
 - **[性能优化](./doc/performance.md)**: Webpack 与网络层面的深度优化记录。
 - **[部署指南](./doc/deployment.md)**: 生产环境构建与 Nginx 配置。
 
 ### 开发指南
+
 - **[项目搭建指南](./doc/project-setup.md)**: 从零搭建项目的详细步骤。
 - **[Server Node 开发指南](./doc/server-node-guide.md)**: 服务端开发规范与最佳实践。
 - **[数据库迁移指南](./doc/db-migration-guide.md)**: Prisma 数据库迁移操作手册。
@@ -103,13 +110,16 @@ wendong_project
 - **[代码规范与 Lint](./doc/lint-workflow.md)**: ESLint/Prettier 配置说明。
 
 ### 业务与功能设计
+
 - **[AI 集成指南](./doc/phase3-ai-integration.md)**: RAG 与流式对话实现细节。
 - **[AI 提示词指南](./doc/ai-prompt-guide.md)**: Prompt Engineering 实践。
 - **[前端聊天设计](./doc/frontend-chat-design.md)**: Chat UI 与逻辑设计文档。
 
 ### 其他/归档
+
 - **[Business Core 说明](./doc/business-core-package-json.md)**: 早期 Business Core 包结构说明。
 - **[阿里云 ECS 部署手册](./doc/阿里云_ECS_部署_React_Node_操作手册.md)**: 具体的阿里云环境部署实操记录。
+- **[阿里云 ACR 部署记录](./doc/deployment-log-acr.md)**: 基于容器镜像服务的现代化部署流程实录 (Phase 3)。
 
 ---
 

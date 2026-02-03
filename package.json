@@ -5,7 +5,7 @@
   "description": "Monorepo project for frontend architecture practice",
   "scripts": {
     "start:web": "pnpm --filter web-react start",
-    "start:server": "pnpm --filter server-node dev",
+    "start:server": "pnpm --filter server-node start",
     "build:server": "pnpm --filter server-node build",
     "build:web": "pnpm --filter web-react build",
     "lint": "node scripts/check-node.js && eslint .",
@@ -16,6 +16,11 @@
     "node": ">=18"
   },
   "packageManager": "pnpm@10.27.0",
+  "pnpm": {
+    "overrides": {
+      "string-width": "7.2.0"
+    }
+  },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0",

@@ -110,7 +110,6 @@ const ChatPage: React.FC = () => {
 
   return (
     <Flex vertical style={{ height: 'calc(100vh - 50px)' }}>
-      {' '}
       {/* 减去导航栏高度 */}
       {/* 消息列表 */}
       <div

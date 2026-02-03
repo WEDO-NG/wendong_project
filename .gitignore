@@ -35,3 +35,7 @@ pnpm-debug.log*
 
 # Testing
 coverage
+
+# Local RAG artifacts
+apps/server-node/models/
+apps/server-node/data/vector-store/

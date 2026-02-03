@@ -35,8 +35,12 @@ services:
       # 生产环境密钥应通过 CI/CD 注入，这里仅为示例
       - AI_API_KEY=${AI_API_KEY}
       - AI_BASE_URL=${AI_BASE_URL}
+      - RAG_INDEX_ON_BOOT=${RAG_INDEX_ON_BOOT:-1}
+      - RAG_FORCE_REINDEX=${RAG_FORCE_REINDEX:-0}
     networks:
       - wendong_net
+    volumes:
+      - server_node_vector_store:/app/data/vector-store
     depends_on:
       mysql:
         condition: service_healthy
@@ -64,3 +68,4 @@ networks:
 
 volumes:
   mysql_prod_data:
+  server_node_vector_store:

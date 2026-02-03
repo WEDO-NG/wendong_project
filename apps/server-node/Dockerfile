@@ -15,6 +15,10 @@ RUN pnpm --filter server-node build
 RUN pnpm --filter server-node --prod deploy /prod/server-node --legacy
 RUN cp -r apps/server-node/prisma /prod/server-node/prisma
 RUN pnpm --filter server-node exec prisma generate --schema=/prod/server-node/prisma/schema.prisma
+RUN cp -r apps/server-node/models /prod/server-node/models
+RUN cp -r doc /prod/server-node/doc
+RUN cp README.md /prod/server-node/README.md
+RUN mkdir -p /prod/server-node/data/vector-store
 
 FROM node:18-alpine AS runner
 

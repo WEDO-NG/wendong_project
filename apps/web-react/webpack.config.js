@@ -19,10 +19,10 @@ module.exports = (env, argv) => {
     resolve: {
       extensions: ['.tsx', '.ts', '.js'],
       alias: {
-        '@wendong/business-core': path.resolve(
-          __dirname,
-          '../../packages/business-core/src/index.ts'
-        ),
+        '@wendong/business-core': path.resolve(__dirname, '../../packages/business-core/src'),
+        '@wendong/adapters': path.resolve(__dirname, '../../packages/adapters/src'),
+        '@wendong/utils': path.resolve(__dirname, '../../packages/utils/src'),
+        '@wendong/web-ui': path.resolve(__dirname, '../../packages/web-ui/src'),
       },
     },
     module: {
@@ -42,6 +42,8 @@ module.exports = (env, argv) => {
             path.resolve(__dirname, 'src'),
             path.resolve(__dirname, '../../packages/business-core/src'),
             path.resolve(__dirname, '../../packages/adapters/src'),
+            path.resolve(__dirname, '../../packages/utils/src'),
+            path.resolve(__dirname, '../../packages/web-ui/src'),
           ],
         },
         {
@@ -126,7 +128,7 @@ module.exports = (env, argv) => {
         directory: path.join(__dirname, 'public'),
       },
       compress: true,
-      port: 3000,
+      port: Number(process.env.PORT) || 3000,
       hot: true,
       historyApiFallback: true,
     },
