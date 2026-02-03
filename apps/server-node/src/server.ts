@@ -15,7 +15,7 @@ const shouldIndexOnBoot = !['0', 'false', 'no'].includes(
   String(process.env.RAG_INDEX_ON_BOOT || '1').toLowerCase()
 );
 const forceReindex = ['1', 'true', 'yes'].includes(
-  String(process.env.RAG_FORCE_REINDEX || '0').toLowerCase()
+  String(process.env.RAG_FORCE_REINDEX || '1').toLowerCase()
 );
 
 if (shouldIndexOnBoot) {

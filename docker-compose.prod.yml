@@ -36,7 +36,7 @@ services:
       - AI_API_KEY=${AI_API_KEY}
       - AI_BASE_URL=${AI_BASE_URL}
       - RAG_INDEX_ON_BOOT=${RAG_INDEX_ON_BOOT:-1}
-      - RAG_FORCE_REINDEX=${RAG_FORCE_REINDEX:-0}
+      - RAG_FORCE_REINDEX=${RAG_FORCE_REINDEX:-1}
     networks:
       - wendong_net
     volumes:

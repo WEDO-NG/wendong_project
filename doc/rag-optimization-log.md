@@ -48,9 +48,10 @@ pnpm add @lancedb/lancedb @xenova/transformers
 创建了 `scripts/index-docs.ts`，用于离线建立索引：
 
 1.  扫描 `doc/` 目录下的所有 Markdown 文件。
-2.  按段落/标题进行文本切片 (Chunking)。
-3.  调用 EmbeddingService 生成向量。
-4.  存入 `data/vector-store` 目录。
+2.  **扫描项目源代码 (`src/**/\*.{ts,tsx}`) 及关键配置文件 (`package.json`, `docker-compose.yml`)\*\*，赋予 AI 阅读代码的能力。
+3.  按段落/标题/代码块进行文本切片 (Chunking)，并保留代码上下文重叠。
+4.  调用 EmbeddingService 生成向量。
+5.  存入 `data/vector-store` 目录。
 
 ### 3.4 业务集成
 

@@ -34,7 +34,11 @@ export class VectorStoreService {
   private async init() {
     if (this.db && this.table) return;
 
-    await fs.mkdir(VectorStoreService.DB_PATH, { recursive: true });
+    // Ensure data directory exists
+    const dataDir = path.dirname(VectorStoreService.DB_PATH);
+    await fs.mkdir(dataDir, { recursive: true });
+
+    console.log(`[VectorStoreService] DB Path: ${VectorStoreService.DB_PATH}`);
 
     this.db = await lancedb.connect(VectorStoreService.DB_PATH);
 

@@ -7,12 +7,13 @@ export class PromptManager {
 
     try {
       const vectorStore = VectorStoreService.getInstance();
-      const results = await vectorStore.search(userMessage, 3);
+      // 增加检索数量以获取更多代码上下文
+      const results = await vectorStore.search(userMessage, 5);
 
       if (results.length > 0) {
         console.log(`[PromptManager] Hit ${results.length} relevant docs via Vector Search.`);
         context = results
-          .map((r, i) => `[Document Fragment ${i + 1}] (Source: ${r.source})\n${r.text}`)
+          .map((r, i) => `[Context Fragment ${i + 1}] (Source: ${r.source})\n${r.text}`)
           .join('\n\n');
       } else {
         console.log('[PromptManager] No vector search results, using README summary.');
@@ -54,10 +55,11 @@ ${context}
 ---
 
 使用规则：
-1. 文档中明确存在的内容 → 作为**项目真实经历**
-2. 文档未覆盖的部分 → 只能作为「通用工程经验」
-3. 严禁虚构项目中不存在的功能、架构或决策
-4. 不允许为了“听起来厉害”而夸大项目能力
+1. 文档或代码中明确存在的内容 → 作为**项目真实经历**
+2. 如果上下文包含代码片段（Code Fragment），请基于代码逻辑进行技术分析
+3. 文档未覆盖的部分 → 只能作为「通用工程经验」
+4. 严禁虚构项目中不存在的功能、架构或决策
+5. 不允许为了“听起来厉害”而夸大项目能力
 
 
 ---
