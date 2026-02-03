@@ -74,44 +74,122 @@ export class VectorStoreService {
   private async buildDocChunks(
     projectRoot: string
   ): Promise<{ text: string; source: string; category: string }[]> {
-    const docsPath = path.join(projectRoot, 'doc');
-    const readmePath = path.join(projectRoot, 'README.md');
-
-    const docFiles = await glob('**/*.md', { cwd: docsPath });
-    const files: { filePath: string; source: string; category: string }[] = [
-      ...docFiles.map((f) => ({
-        filePath: path.join(docsPath, f),
-        source: `doc/${f}`,
-        category: 'doc',
-      })),
-      { filePath: readmePath, source: 'README.md', category: 'readme' },
+    console.log(`[VectorStoreService] Scanning files in ${projectRoot}...`);
+    // 兼容 Docker 环境和本地 Monorepo 环境的路径
+    const patterns = [
+      // 文档
+      'doc/**/*.md',
+      'README.md',
+      // 源代码 (Monorepo 结构)
+      'apps/*/src/**/*.{ts,tsx}',
+      'packages/*/src/**/*.{ts,tsx}',
+      // 源代码 (Docker 扁平结构 - server-node 源码在 ./src, packages 在 ./packages)
+      'src/**/*.{ts,tsx}',
+      // 关键配置文件
+      'apps/*/package.json',
+      'packages/*/package.json',
+      'package.json',
+      'docker-compose*.yml',
     ];
+
+    const ignorePatterns = [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/.next/**',
+      '**/*.test.ts',
+      '**/*.spec.ts',
+      '**/__tests__/**',
+      '**/*.d.ts',
+    ];
+
+    const files = await glob(patterns, {
+      cwd: projectRoot,
+      ignore: ignorePatterns,
+      nodir: true,
+    });
+
+    console.log(`[VectorStoreService] Found ${files.length} files to index.`);
 
     const chunks: { text: string; source: string; category: string }[] = [];
 
-    for (const file of files) {
+    for (const relPath of files) {
+      const filePath = path.join(projectRoot, relPath);
+      const category = this.getCategory(relPath);
+
       try {
-        const content = await fs.readFile(file.filePath, 'utf-8');
-        const paragraphs = content.split('\n\n').filter((p) => p.trim().length > 0);
+        const content = await fs.readFile(filePath, 'utf-8');
+        if (!content.trim()) continue;
 
-        for (const p of paragraphs) {
-          if (p.length < 20) continue;
-
-          if (p.length > 800) {
-            const subChunks = p.match(/.{1,800}/g) || [];
-            subChunks.forEach((sub) => {
-              chunks.push({ text: sub, source: file.source, category: file.category });
-            });
-          } else {
-            chunks.push({ text: p, source: file.source, category: file.category });
-          }
+        if (category === 'code' || category === 'config') {
+          const codeChunks = this.chunkCode(content, relPath, category);
+          chunks.push(...codeChunks);
+        } else {
+          const docChunks = this.chunkMarkdown(content, relPath, category);
+          chunks.push(...docChunks);
         }
       } catch (e) {
-        console.warn(`[VectorStoreService] Failed to read ${file.filePath}:`, e);
+        console.warn(`[VectorStoreService] Failed to read ${relPath}:`, e);
       }
     }
 
     return chunks;
+  }
+
+  private getCategory(filePath: string): string {
+    if (filePath.endsWith('.md')) return 'doc';
+    if (filePath.endsWith('.json') || filePath.endsWith('.yml') || filePath.endsWith('.yaml'))
+      return 'config';
+    return 'code';
+  }
+
+  private chunkCode(content: string, source: string, category: string) {
+    const CHUNK_SIZE = 1500;
+    const OVERLAP = 300;
+    const chunks: { text: string; source: string; category: string }[] = [];
+
+    const fileHeader = `File: ${source}\n\`\`\`${this.getFileExtension(source)}\n`;
+    // eslint-disable-next-line no-useless-escape
+    const fileFooter = '\n\`\`\`';
+
+    let start = 0;
+    while (start < content.length) {
+      const end = Math.min(start + CHUNK_SIZE, content.length);
+      const chunkContent = content.slice(start, end);
+      const fullText = `${fileHeader}${chunkContent}${fileFooter}`;
+
+      chunks.push({ text: fullText, source, category });
+
+      if (end >= content.length) break;
+      start += CHUNK_SIZE - OVERLAP;
+    }
+    return chunks;
+  }
+
+  private chunkMarkdown(content: string, source: string, category: string) {
+    const chunks: { text: string; source: string; category: string }[] = [];
+    const paragraphs = content.split('\n\n').filter((p) => p.trim().length > 0);
+
+    for (const p of paragraphs) {
+      if (p.length < 20) continue;
+
+      if (p.length > 1000) {
+        const subChunks = p.match(/.{1,1000}/g) || [];
+        subChunks.forEach((sub) => {
+          chunks.push({ text: `Source: ${source}\n\n${sub}`, source, category });
+        });
+      } else {
+        chunks.push({ text: `Source: ${source}\n\n${p}`, source, category });
+      }
+    }
+    return chunks;
+  }
+
+  private getFileExtension(filePath: string): string {
+    const ext = path.extname(filePath).substring(1);
+    if (ext === 'ts' || ext === 'tsx') return 'typescript';
+    if (ext === 'js' || ext === 'jsx') return 'javascript';
+    return ext;
   }
 
   public async ensureIndexed(options?: { force?: boolean }) {

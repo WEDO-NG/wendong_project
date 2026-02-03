@@ -27,5 +27,9 @@ RUN apk add --no-cache openssl ca-certificates
 WORKDIR /app
 COPY --from=builder /prod/server-node .
 
+# 复制源码以供 RAG 扫描 (Server 源码 & Shared Packages)
+COPY --from=builder /app/apps/server-node/src ./src
+COPY --from=builder /app/packages ./packages
+
 EXPOSE 3001
 CMD ["node", "dist/server.js"]

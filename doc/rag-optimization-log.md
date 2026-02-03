@@ -2,6 +2,25 @@
 
 > 记录于 Phase 3 阶段：优化 AI 问答准确度与性能。
 
+## Phase 2: Code Awareness & Docker Fix (2026-02-03)
+
+### 问题描述
+
+线上环境 AI 无法读取代码，回答风格降级。排查发现：
+
+1. `VectorStoreService` 使用了旧的索引逻辑（仅扫描文档），未同步 `scripts/index-docs.ts` 的更新。
+2. Docker 生产镜像 (`runner` stage) 仅包含编译后的 `dist`，缺失源代码，导致 RAG 扫描落空。
+
+### 优化措施
+
+1. **同步索引逻辑**：将代码切片、多目录扫描逻辑移植到 `VectorStoreService`。
+2. **适配 Docker 环境**：
+   - 修改 `Dockerfile`，显式将源码 (`apps/server-node/src`, `packages`) 复制到运行镜像。
+   - 更新 glob patterns，兼容本地 Monorepo 结构 (`apps/*/src`) 和 Docker 扁平结构 (`src/`).
+3. **强制重建索引**：建议通过 `RAG_FORCE_REINDEX=true` 或删除 Volume 触发重建。
+
+## Phase 1: Initial RAG Setup
+
 ## 1. 背景与目标
 
 原有的 RAG (Retrieval-Augmented Generation) 实现采用"暴力全量加载"策略，即每次请求都读取所有项目文档拼接到 Prompt 中。这种方式存在以下问题：
