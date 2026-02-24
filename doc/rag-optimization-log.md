@@ -2,25 +2,6 @@
 
 > 记录于 Phase 3 阶段：优化 AI 问答准确度与性能。
 
-## Phase 2: Code Awareness & Docker Fix (2026-02-03)
-
-### 问题描述
-
-线上环境 AI 无法读取代码，回答风格降级。排查发现：
-
-1. `VectorStoreService` 使用了旧的索引逻辑（仅扫描文档），未同步 `scripts/index-docs.ts` 的更新。
-2. Docker 生产镜像 (`runner` stage) 仅包含编译后的 `dist`，缺失源代码，导致 RAG 扫描落空。
-
-### 优化措施
-
-1. **同步索引逻辑**：将代码切片、多目录扫描逻辑移植到 `VectorStoreService`。
-2. **适配 Docker 环境**：
-   - 修改 `Dockerfile`，显式将源码 (`apps/server-node/src`, `packages`) 复制到运行镜像。
-   - 更新 glob patterns，兼容本地 Monorepo 结构 (`apps/*/src`) 和 Docker 扁平结构 (`src/`).
-3. **强制重建索引**：建议通过 `RAG_FORCE_REINDEX=true` 或删除 Volume 触发重建。
-
-## Phase 1: Initial RAG Setup
-
 ## 1. 背景与目标
 
 原有的 RAG (Retrieval-Augmented Generation) 实现采用"暴力全量加载"策略，即每次请求都读取所有项目文档拼接到 Prompt 中。这种方式存在以下问题：
@@ -140,7 +121,97 @@ curl -L -o onnx/model_quantized.onnx $BASE_URL/onnx/model_quantized.onnx
 - 本地开发（macOS Intel/ARM）通常可自动安装对应包。
 - 生产环境如果使用 `node:alpine`（musl），可能需要确保安装了对应的 `@lancedb/lancedb-linux-x64-musl` 变体（由依赖链自动拉取或显式添加），否则运行时会出现找不到二进制模块的错误。
 
-## 5. 后续优化方向
+## 5. 模型基础镜像方案 (新实施规划)
+
+### 5.1 方案背景
+
+为解决模型文件（109MB）与代码分离管理的问题，避免 Git 仓库膨胀，同时支持阿里云 ACR 云端自动构建，引入"模型基础镜像"策略。
+
+### 5.2 核心思路
+
+**分离打包**：
+
+- **代码镜像**：轻量级，仅包含业务代码，支持频繁更新
+- **模型镜像**：重量级，仅包含 AI 模型文件，更新频率低
+
+**构建流程**：
+
+1. 模型镜像独立构建推送（一次性或模型更新时）
+2. 代码镜像构建时从模型镜像复制模型文件
+3. 支持阿里云 ACR 云端自动构建代码镜像
+
+### 5.3 实施步骤规划
+
+#### 步骤1：创建模型基础镜像
+
+已创建专用 Dockerfile：
+
+```dockerfile
+# Dockerfile.models - 模型专用镜像
+FROM alpine:latest
+WORKDIR /data
+COPY apps/server-node/models /data/models
+RUN du -sh /data/models
+```
+
+#### 步骤2：构建并推送模型镜像
+
+```bash
+# 登录阿里云 ACR
+docker login crpi-emqag2foql120pnh.cn-beijing.personal.cr.aliyuncs.com
+
+# 构建模型镜像
+docker build -f Dockerfile.models -t crpi-emqag2foql120pnh.cn-beijing.personal.cr.aliyuncs.com/wendong-registry/wendong-models:latest .
+
+# 推送到镜像仓库
+docker push crpi-emqag2foql120pnh.cn-beijing.personal.cr.aliyuncs.com/wendong-registry/wendong-models:latest
+```
+
+#### 步骤3：修改主 Dockerfile
+
+修改 `apps/server-node/Dockerfile`：
+
+```dockerfile
+# 在 builder 阶段添加模型镜像引用
+FROM crpi-emqag2foql120pnh.cn-beijing.personal.cr.aliyuncs.com/wendong-registry/wendong-models:latest as models
+
+# 在需要模型的地方复制
+COPY --from=models /data/models /prod/server-node/models
+```
+
+#### 步骤4：配置阿里云 ACR 自动构建
+
+1. 在阿里云控制台创建代码源绑定（GitHub/GitLab）
+2. 配置构建规则：
+   - 触发条件：代码推送
+   - 构建上下文：项目根目录
+   - Dockerfile 路径：`apps/server-node/Dockerfile`
+   - 镜像标签：`latest`
+
+### 5.4 优势分析
+
+| 优势             | 说明                                     |
+| ---------------- | ---------------------------------------- |
+| **Git 仓库轻量** | 模型文件不进入 Git，保持代码仓库小巧     |
+| **构建速度快**   | 代码镜像构建无需处理大文件，云端构建更快 |
+| **更新灵活**     | 代码和模型可独立更新，互不影响           |
+| **成本优化**     | 模型镜像只需构建一次，重复使用           |
+| **标准化**       | 符合云原生最佳实践，支持 CI/CD 集成      |
+
+### 5.5 注意事项
+
+1. **模型版本管理**：建议在模型镜像标签中包含版本信息
+2. **多平台支持**：确保模型镜像支持目标平台（linux/amd64）
+3. **网络优化**：使用阿里云内网地址加速镜像拉取
+4. **安全考虑**：模型镜像可设为私有，避免泄露
+
+### 5.6 后续扩展
+
+- **多模型支持**：可扩展支持多个 Embedding 模型
+- **缓存策略**：在构建节点缓存模型镜像，进一步提升速度
+- **版本追踪**：建立模型版本与代码版本的映射关系
+
+## 6. 后续优化方向
 
 1.  **混合检索 (Hybrid Search)**: 结合关键词匹配 (BM25) 和向量检索，提升对专有名词的命中率。
 2.  **元数据过滤**: 允许只在特定类别的文档（如 "API文档"）中搜索。

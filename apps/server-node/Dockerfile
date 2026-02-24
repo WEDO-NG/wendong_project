@@ -1,3 +1,5 @@
+FROM crpi-emqag2foql120pnh.cn-beijing.personal.cr.aliyuncs.com/wendong-registry/wendong-models:latest AS models
+
 FROM node:18-alpine AS builder
 
 RUN apk add --no-cache openssl ca-certificates
@@ -15,7 +17,7 @@ RUN pnpm --filter server-node build
 RUN pnpm --filter server-node --prod deploy /prod/server-node --legacy
 RUN cp -r apps/server-node/prisma /prod/server-node/prisma
 RUN pnpm --filter server-node exec prisma generate --schema=/prod/server-node/prisma/schema.prisma
-RUN cp -r apps/server-node/models /prod/server-node/models
+COPY --from=models /data/models /prod/server-node/models
 RUN cp -r doc /prod/server-node/doc
 RUN cp README.md /prod/server-node/README.md
 RUN mkdir -p /prod/server-node/data/vector-store

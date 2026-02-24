@@ -1,0 +1,15 @@
+# 这是一个专门用于存储模型的“数据镜像”
+# 它不包含任何代码，只包含 models 目录
+# 目的：将大文件模型单独打包推送到镜像仓库，供主镜像构建时引用
+
+FROM alpine:latest
+
+# 创建目录
+WORKDIR /data
+
+# 将本地模型复制到镜像中
+# 注意：构建此镜像时，需要在项目根目录运行，且确保 models 目录存在
+COPY apps/server-node/models /data/models
+
+# 打印一下大小，方便验证
+RUN du -sh /data/models
